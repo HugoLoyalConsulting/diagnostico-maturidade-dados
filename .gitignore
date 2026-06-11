@@ -11,3 +11,5 @@ VIDEO_QA_README.md
 # Backend
 backend/node_modules/
 backend/.env
+
+backend/.railway/
