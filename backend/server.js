@@ -32,7 +32,7 @@ async function start() {
     console.log('[DB] Tabelas inicializadas.');
     app.listen(PORT, () => console.log(`[API] Rodando na porta ${PORT}`));
   } catch (err) {
-    console.error('[FATAL] Falha ao iniciar:', err.message);
+    console.error('[FATAL] Falha ao iniciar:', err?.message || err);
     process.exit(1);
   }
 }

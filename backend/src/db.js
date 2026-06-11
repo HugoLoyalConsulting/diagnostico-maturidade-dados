@@ -1,9 +1,11 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
+// Railway internal URLs (.railway.internal) não usam SSL; externas sim.
+const isInternalUrl = (process.env.DATABASE_URL || '').includes('.railway.internal');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: isInternalUrl ? false : { rejectUnauthorized: false },
 });
 
 async function initDB() {
