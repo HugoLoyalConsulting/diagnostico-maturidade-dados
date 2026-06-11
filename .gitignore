@@ -1,0 +1,13 @@
+# Arquivos de desenvolvimento local
+video_frames/
+video_frames_mobile_v3/
+exports-video/
+videos-tutoriais/
+scripts/
+video_qa.html
+video_qa_log.jsonl
+VIDEO_QA_README.md
+
+# Backend
+backend/node_modules/
+backend/.env
