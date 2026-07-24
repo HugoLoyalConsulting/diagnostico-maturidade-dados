@@ -1577,6 +1577,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
     };
 
+    const WA_NUMBER    = '5511999999999'; // substituir pelo número de WhatsApp comercial
+    const CALENDLY_URL = 'https://calendly.com/loyalconsulting/discovery'; // substituir pela URL real
+
     const state = {
       currentStep: 1,
       lead: {
@@ -1589,7 +1592,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         area: "",
         role: "",
         companySize: "",
-        website: ""
+        website: "",
+        lgpd: false
       },
       answers: {},
       observations: {},
@@ -1850,9 +1854,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
 
     function renderLeadPage() {
+      const lgpdChecked = state.lead.lgpd ? 'checked' : '';
       return `
-        <h2>Informações Gerais do Lead</h2>
-        <p>Preencha os dados para personalizar o diagnóstico e o relatório executivo.</p>
+        <h2>Sobre você e a sua empresa</h2>
+        <p>Leva menos de 2 minutos. Seus dados aparecem no relatório executivo e ficam registrados somente na Loyal Consulting.</p>
+        <div id="f-lgpd" style="margin-bottom:16px; padding:14px 16px; border-radius:10px; border:1px solid rgba(148,91,255,0.3); background:rgba(148,91,255,0.07);">
+          <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+            <input type="checkbox" id="lgpdCheckbox" ${lgpdChecked}
+              onchange="state.lead.lgpd=this.checked; document.getElementById('f-lgpd').classList.remove('invalid'); document.getElementById('err-lgpd').style.display='none'; saveState();"
+              style="margin-top:3px; flex-shrink:0; accent-color:var(--primary);" />
+            <span style="font-size:12.5px; color:var(--muted); line-height:1.55;">
+              Li e concordo com o uso dos meus dados pessoais pela <strong style="color:var(--text);">Loyal Consulting</strong>
+              para fins de contato comercial, diagnóstico de maturidade de dados e registro em CRM,
+              em conformidade com a <strong style="color:var(--text);">LGPD (Lei n.º 13.709/2018)</strong>.
+            </span>
+          </label>
+          <span id="err-lgpd" style="display:none; font-size:11px; color:var(--danger); margin-top:6px; padding-left:26px;">
+            Você precisa aceitar o uso dos dados para continuar.
+          </span>
+        </div>
         <div class="grid grid-2">
           ${inputField("Nome","firstName", "text", true, "", "Ex.: Carlos")}
           ${inputField("Sobrenome","lastName", "text", true, "", "Ex.: Mendes")}
@@ -2280,9 +2300,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           </article>
         </div>
         <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" id="downloadPdfBtn" type="button">Exportar PDF Completo</button>
+          <button class="btn btn-primary" id="downloadPdfBtn" type="button">📄 Exportar PDF completo</button>
         </div>
-        <div class="export-hint">O PDF inclui recomendações e, em seguida, o formulário preenchido como evidência (Lead + respostas).</div>
+        <div class="export-hint">O PDF inclui o score por dimensão, recomendações e o formulário preenchido como evidência.</div>
+
+        <div style="margin-top:20px; padding:18px; border-radius:12px; background:rgba(148,91,255,0.07); border:1px solid rgba(148,91,255,0.25);">
+          <p style="font-size:15px; font-weight:600; margin:0 0 4px;">O que fazer agora com esse diagnóstico?</p>
+          <p style="font-size:13px; color:var(--muted); margin:0 0 14px; line-height:1.5;">Nossa equipe pode transformar esse relatório em um plano de ação concreto — com prioridades, estimativas e próximos passos.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Olá! Acabei de fazer o Diagnóstico de Maturidade de Dados da Loyal Consulting e gostaria de conversar sobre os resultados.`)}"
+               target="_blank" rel="noopener noreferrer"
+               style="display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:8px; background:#25D366; color:#fff; font-weight:600; font-size:13px; text-decoration:none;">
+              💬 Falar com especialista
+            </a>
+            <a href="${CALENDLY_URL}" target="_blank" rel="noopener noreferrer"
+               style="display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:var(--text); font-weight:600; font-size:13px; text-decoration:none;">
+              📅 Agendar Discovery gratuito
+            </a>
+          </div>
+        </div>
       `;
     }
 
@@ -2293,19 +2329,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         container.innerHTML = renderLeadPage();
       }
       if (state.currentStep === 2) {
-        container.innerHTML = renderQuestionPage(2, "Seção 1 — Clareza e Visibilidade do Negócio", "Página 1 de 5 da avaliação.");
+        container.innerHTML = renderQuestionPage(2, "Clareza e visibilidade do negócio", "Avalie cada item de 1 (não temos) a 5 (funciona muito bem). Pense em como a sua liderança acessa indicadores hoje — sem precisar pedir para ninguém preparar um relatório.");
       }
       if (state.currentStep === 3) {
-        container.innerHTML = renderQuestionPage(3, "Seção 2 — Eficiência Operacional e Automação", "Página 2 de 5 da avaliação.");
+        container.innerHTML = renderQuestionPage(3, "Eficiência operacional e automação", "Com que frequência sua equipe refaz trabalho manual que poderia ser automático? Avalie com honestidade — sem automação, o time não escala.");
       }
       if (state.currentStep === 4) {
-        container.innerHTML = renderQuestionPage(4, "Seção 3 — Qualidade e Integração dos Dados", "Página 3 de 5 da avaliação.");
+        container.innerHTML = renderQuestionPage(4, "Qualidade e integração dos dados", "Os dados que chegam até você são confiáveis? Sistemas diferentes mostram os mesmos números? Avalie a consistência das informações.");
       }
       if (state.currentStep === 5) {
-        container.innerHTML = renderQuestionPage(5, "Seção 4 — Arquitetura, Engenharia e Escalabilidade", "Página 4 de 5 da avaliação.");
+        container.innerHTML = renderQuestionPage(5, "Infraestrutura e capacidade de crescimento", "A estrutura de dados da empresa aguenta crescer? Ou já é um gargalo que trava decisões? Avalie sem considerar o que 'está planejado' — só o que existe hoje.");
       }
       if (state.currentStep === 6) {
-        container.innerHTML = renderQuestionPage(6, "Seção 5 — Governança, Cultura e Stack de Ferramentas", "Página 5 de 5 da avaliação.");
+        container.innerHTML = renderQuestionPage(6, "Governança, cultura e ferramentas", "Existem responsáveis claros pelos dados? A empresa decide com base em números ou em intuição? Avalie a maturidade dos processos e da cultura analítica.");
       }
       if (state.currentStep === 7) {
         container.innerHTML = renderResultPage();
@@ -2405,6 +2441,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     function validateLead() {
       let ok = true;
+      if (!state.lead.lgpd) {
+        ok = false;
+        document.getElementById('f-lgpd')?.classList.add('invalid');
+        const errEl = document.getElementById('err-lgpd');
+        if (errEl) errEl.style.display = 'block';
+      }
       ["firstName","lastName","company","whatsapp","email","sector","area","role","companySize"].forEach(k => {
         const field = document.querySelector(`.field[data-field='${k}']`);
         const val = (state.lead[k] || "").trim();
@@ -2413,7 +2455,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           field?.classList.add("invalid");
         }
       });
-      if (!ok) showToast("Preencha todos os campos obrigatórios do lead.", "error");
+      if (!ok) showToast("Preencha todos os campos obrigatórios e aceite o uso dos dados.", "error");
       return ok;
     }
 
@@ -3493,7 +3535,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     function clearAll() {
       state.currentStep = 1;
       state.lead = {
-        firstName: "", lastName: "", company: "", whatsapp: "", email: "", sector: "", area: "", role: "", companySize: "", website: ""
+        firstName: "", lastName: "", company: "", whatsapp: "", email: "", sector: "", area: "", role: "", companySize: "", website: "", lgpd: false
       };
       state.answers = {};
       state.observations = {};

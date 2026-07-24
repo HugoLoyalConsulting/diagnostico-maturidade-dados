@@ -3,16 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const { initDB } = require('./src/db');
 const submitRoute = require('./src/routes/submit');
+const adminRoute  = require('./src/routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Permite chamadas do GitHub Pages (e localhost para dev)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permite ausência de origem (ex: Postman, curl) e origens na lista
     if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -25,16 +24,26 @@ app.use(express.json({ limit: '512kb' }));
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
 app.use('/api/submit', submitRoute);
+app.use('/api/admin',  adminRoute);
+
+async function initDBWithRetry(maxRetries = 5) {
+  for (let i = 1; i <= maxRetries; i++) {
+    try {
+      await initDB();
+      console.log('[DB] Tabelas inicializadas.');
+      return;
+    } catch (err) {
+      const delay = 3000 * i;
+      console.warn(`[DB] Tentativa ${i}/${maxRetries} falhou (${err?.message || err}). Aguardando ${delay}ms...`);
+      if (i < maxRetries) await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  console.error('[DB] Todas as tentativas falharam.');
+}
 
 async function start() {
-  try {
-    await initDB();
-    console.log('[DB] Tabelas inicializadas.');
-    app.listen(PORT, () => console.log(`[API] Rodando na porta ${PORT}`));
-  } catch (err) {
-    console.error('[FATAL] Falha ao iniciar:', err?.message || err);
-    process.exit(1);
-  }
+  app.listen(PORT, () => console.log(`[API] Rodando na porta ${PORT}`));
+  await initDBWithRetry();
 }
 
 start();

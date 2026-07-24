@@ -8,6 +8,17 @@ video_qa.html
 video_qa_log.jsonl
 VIDEO_QA_README.md
 
+# QA (screenshots/vídeos de teste, não é código)
+qa/
+
+# Dependências e build (raiz + subpastas)
+node_modules/
+.env
+.env.*
+dist/
+build/
+__pycache__/
+
 # Backend
 backend/node_modules/
 backend/.env

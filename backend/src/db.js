@@ -1,11 +1,11 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-// Railway internal URLs (.railway.internal) não usam SSL; externas sim.
-const isInternalUrl = (process.env.DATABASE_URL || '').includes('.railway.internal');
+// Railway Postgres expõe SSL via proxy público (*.proxy.rlwy.net).
+// Certificado auto-assinado → rejectUnauthorized: false.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: isInternalUrl ? false : { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false },
 });
 
 async function initDB() {
